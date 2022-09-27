@@ -33,6 +33,7 @@ while True:
     now = now.strftime('%m/%d %H:%M')
     Calendar.events = pd.DataFrame()
     Calendar.get_events_from_all_calendars(cal_ids=cal_ids)
+    # Calendar.process_events(required_categories=['summary', 'location', 'description', 'start', 'end'])
     Calendar.process_events(required_categories=['summary', 'location', 'start', 'end'])
     Calendar.push_to_trello()
     print(' Updated at ' + now)

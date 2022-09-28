@@ -5,6 +5,7 @@ import re
 import requests
 import json
 import pandas as pd
+import markdownify
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -99,8 +100,8 @@ class GoogleCalendar():
         except:
             raise RuntimeError('Calendar Id might be invalid, update it by using update_calendar_id method, or else you might have used the wrong google account for obtaining the token.')
 
-    #def process_events(self, pretty_time = True, required_categories = ['summary', 'location', 'description', 'start', 'end']):
-    def process_events(self, pretty_time = True, required_categories = ['summary', 'location', 'start', 'end']):
+    def process_events(self, pretty_time = True, required_categories = ['summary', 'location', 'description', 'start', 'end']):
+    # def process_events(self, pretty_time = True, required_categories = ['summary', 'location', 'start', 'end']):
         # Note on required categories: If you enter location or description in the calendar, make sure to add that to required_categories or else the program will skip it.
         for i in required_categories:
             if i not in self.events.columns:
@@ -120,12 +121,17 @@ class GoogleCalendar():
                 self.events['end'] = self.pretty_time(self.events, num_events_detected, 'end')
 
             self.events['timings'] = [self.events['start'][i] + ' -> ' + self.events['end'][i] for i in range(len(self.events))]
-            # self.events['desc'] = [self.events['description'][i] for i in range(len(self.events))]
-            required_categories.remove('start')
-            required_categories.remove('end')
-            required_categories.append('timings')
-            # required_categories.remove('description')
-            # required_categories.append('desc')
+            try:
+                self.events['desc'] = markdownify.markdownify(str([self.events['description'][i] for i in range(len(self.events))]), heading_style="ATX")
+                required_categories.remove('start')
+                required_categories.remove('end')
+                required_categories.append('timings')
+                required_categories.remove('description')
+                required_categories.append('desc')
+            except KeyError:
+                required_categories.remove('start')
+                required_categories.remove('end')
+                required_categories.append('timings')
 
             self.events = self.events[required_categories]
 
@@ -178,11 +184,23 @@ class GoogleCalendar():
 
         for i in range(self.events.shape[0]):
             query['name'] = ''
-            #query['desc'] = ''
-            #for j in range(self.events.columns-1) :
-            for j in self.events.columns:
-                query['name'] += str(cal_data[j][i]) + ' | ' 
-            #query['desc'] += str(cal_data[self.events.columns-1][i])
+            query['desc'] = ''
+            # for j in range(self.events.columns-1) :
+            # index = 0
+            # while index < len(self.events.columns) - 1:
+            #     query['name'] += str(cal_data[index][i]) + '|'
+            #     index += 1
+            # query['desc'] += str(cal_data[len(self.events.columns)-1][i])
+            
+            # query['desc'] += str(cal_data[len(self.events.columns)-1][i])
+            try:
+                for j in self.events.columns[:-1]:
+                    query['name'] += str(cal_data[j][i]) + ' | ' 
+                    query['desc'] += str(self.events['desc'][i])
+            except KeyError:
+                for j in self.events.columns[:-1]:
+                  query['name'] += str(cal_data[j][i]) + ' | ' 
+                print("No descriptions found")
 
             response = requests.request(
                 "POST",

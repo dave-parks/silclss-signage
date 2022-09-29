@@ -214,17 +214,10 @@ class GoogleCalendar():
         for i in range(self.events.shape[0]):
             query['name'] = ''
             query['desc'] = ''
-            # for j in range(self.events.columns-1) :
-            # index = 0
-            # while index < len(self.events.columns) - 1:
-            #     query['name'] += str(cal_data[index][i]) + '|'
-            #     index += 1
-            # query['desc'] += str(cal_data[len(self.events.columns)-1][i])
-            
-            # query['desc'] += str(cal_data[len(self.events.columns)-1][i])
             try:
                 for j in self.events.columns[:-1]:
                     query['name'] += str(cal_data[j][i]) + ' | ' 
+                    #Convert HTML to Markdown
                     query['desc'] = markdownify.markdownify(str(self.events['desc'][i]))
             except KeyError:
                 for j in self.events.columns[:-1]:

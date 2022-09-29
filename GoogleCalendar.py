@@ -122,7 +122,7 @@ class GoogleCalendar():
 
             self.events['timings'] = [self.events['start'][i] + ' -> ' + self.events['end'][i] for i in range(len(self.events))]
             try:
-                self.events['desc'] = markdownify.markdownify(str([self.events['description'][i] for i in range(len(self.events))]), heading_style="ATX")
+                self.events['desc'] = [self.events['description'][i] for i in range(len(self.events))]
                 required_categories.remove('start')
                 required_categories.remove('end')
                 required_categories.append('timings')
@@ -196,7 +196,7 @@ class GoogleCalendar():
             try:
                 for j in self.events.columns[:-1]:
                     query['name'] += str(cal_data[j][i]) + ' | ' 
-                    query['desc'] += str(self.events['desc'][i])
+                    query['desc'] = markdownify.markdownify(str(self.events['desc'][i]))
             except KeyError:
                 for j in self.events.columns[:-1]:
                   query['name'] += str(cal_data[j][i]) + ' | ' 

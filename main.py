@@ -4,30 +4,38 @@
 #Uses the methods defined for that class to interact with 
 #Google Calendar on a higher level
 from GoogleCalendar import GoogleCalendar
+import sys
 import os
 import  datetime
 import pandas as pd
 import time 
+import yaml
+
+with open(os.path.join(sys.path[0], "config.yaml"), "r") as file:
+             config_yaml = yaml.safe_load(file)
 
 cal_ids = {
-    'DH 132A': '187f1ca7b63d2c339d2c4960b5b8bab9b91c79c8d1af34d14f1ce7df4bc4ec9a@group.calendar.google.com',
-    'DH 132B': 'j5avt91ooa3od3soh7nr9ierhs@group.calendar.google.com',
-    'DH 132D': 'j3qlh1jb2cd51rfi6gt8lh8s1g@group.calendar.google.com',
-    'DH 132E': 'uck44cgk8dj5joevmrvaad198k@group.calendar.google.com',
-    'DH 132F': '3pq91mul7uqtlrvccbhljannes@group.calendar.google.com',
-    'DH 132G': 'ac53js5his3qjdjpp4d153i1cs@group.calendar.google.com',
-    'DH 132H': '1j4bs75th9ucro7km124703qs0@group.calendar.google.com',
-    'DH 132J': 'e04c3mg51kv8qt339vreqkvke0@group.calendar.google.com',
-    'DH 135': 'n5b8clq1bnd9eoihakkiqn70gc@group.calendar.google.com',
-    'DH 137': '2fcqi6srl6jbnkpqtpttmfpl2s@group.calendar.google.com',
-    'DH 138': 'vl3tfk79m72voc6mkrgms0li9o@group.calendar.google.com',
-    'DH 142': 'bf2cr4qe433lgsacv0vgo9m73o@group.calendar.google.com'
+    'DH 132A': config_yaml['google']['DH 132A'],
+    'DH 132B': config_yaml['google']['DH 132B'],
+    'DH 132D': config_yaml['google']['DH 132D'],
+    'DH 132E': config_yaml['google']['DH 132E'],
+    'DH 132F': config_yaml['google']['DH 132F'],
+    'DH 132G': config_yaml['google']['DH 132G'],
+    'DH 132H': config_yaml['google']['DH 132H'],
+    'DH 132J': config_yaml['google']['DH 132J'],
+    'DH 135': config_yaml['google']['DH 135'],
+    'DH 137': config_yaml['google']['DH 137'],
+    'DH 138': config_yaml['google']['DH 138'],
+    'DH 142': config_yaml['google']['DH 142']
 } 
 
-os.chdir(r"C:\Users\fwi_app\Desktop\Signage\Final Software") 
+print("Current path is: ", os.getcwd())
+os.chdir(os.getcwd()) 
 delay = 300
 Calendar = GoogleCalendar()
-Calendar.set_credentials_file_path(r"C:\Users\fwi_app\Desktop\Signage\Final Software\Credentials.json") 
+print("Credentials path is:")
+print(os.path.join(os.getcwd(), "Credentials.json"))
+Calendar.set_credentials_file_path(r"{0}".format(os.path.join(os.getcwd(), "Credentials.json")))
 Calendar.refresh_token()
 Calendar.get_calendar_service()
 print('-------------------------')

@@ -4,30 +4,38 @@
 #Uses the methods defined for that class to interact with 
 #Google Calendar on a higher level
 from GoogleCalendar import GoogleCalendar
+import sys
 import os
 import  datetime
 import pandas as pd
 import time 
+import yaml
+
+with open(os.path.join(sys.path[0], "config.yaml"), "r") as file:
+             config_yaml = yaml.safe_load(file)
 
 cal_ids = {
-    'DH 132A': 'CALENDAR_ID_HERE',
-    'DH 132B': 'CALENDAR_ID_HERE',
-    'DH 132D': 'CALENDAR_ID_HERE',
-    'DH 132E': 'CALENDAR_ID_HERE',
-    'DH 132F': 'CALENDAR_ID_HERE',
-    'DH 132G': 'CALENDAR_ID_HERE',
-    'DH 132H': 'CALENDAR_ID_HERE',
-    'DH 132J': 'CALENDAR_ID_HERE',
-    'DH 135': 'CALENDAR_ID_HERE',
-    'DH 137': 'CALENDAR_ID_HERE',
-    'DH 138': 'CALENDAR_ID_HERE',
-    'DH 142': 'CALENDAR_ID_HERE'
+    'DH 132A': config_yaml['google']['DH 132A'],
+    'DH 132B': config_yaml['google']['DH 132B'],
+    'DH 132D': config_yaml['google']['DH 132D'],
+    'DH 132E': config_yaml['google']['DH 132E'],
+    'DH 132F': config_yaml['google']['DH 132F'],
+    'DH 132G': config_yaml['google']['DH 132G'],
+    'DH 132H': config_yaml['google']['DH 132H'],
+    'DH 132J': config_yaml['google']['DH 132J'],
+    'DH 135': config_yaml['google']['DH 135'],
+    'DH 137': config_yaml['google']['DH 137'],
+    'DH 138': config_yaml['google']['DH 138'],
+    'DH 142': config_yaml['google']['DH 142']
 } 
 
-os.chdir(r"C:\Users\fwi_app\Desktop\Signage\Final Software") 
+print("Current path is: ", os.getcwd())
+os.chdir(os.getcwd()) 
 delay = 300
 Calendar = GoogleCalendar()
-Calendar.set_credentials_file_path(r"C:\Users\fwi_app\Desktop\Signage\Final Software\Credentials.json") 
+print("Credentials path is:")
+print(os.path.join(os.getcwd(), "Credentials.json"))
+Calendar.set_credentials_file_path(r"{0}".format(os.path.join(os.getcwd(), "Credentials.json")))
 Calendar.refresh_token()
 Calendar.get_calendar_service()
 print('-------------------------')

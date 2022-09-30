@@ -11,6 +11,7 @@ pip install --upgrade pandas requests google-api-python-client google-auth-httpl
 # Todo 
 - ~~Document code (in progress)~~
 - Secure API keys 
+  - API keys transferred to YAML, need to go back to old commits and old lines from git
   - Maybe [this](https://stackoverflow.com/questions/40865425/how-to-remove-sensitive-data-api-key-across-git-commit-history) will help? 
   - Also [this](https://python.land/data-processing/python-yaml)
   - [This](https://stackoverflow.com/questions/52998628/correct-way-for-storing-api-keys-to-credentials-yml-enc) as well

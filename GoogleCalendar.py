@@ -2,24 +2,33 @@
 # edited by Alex Pho
 import datetime
 import pickle
+import sys
 import os
 import re
 import requests
 import json
 import pandas as pd
 import markdownify
+import yaml
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 class GoogleCalendar():
     def __init__(self):
+        os.chdir(os.getcwd()) 
+        with open(os.path.join(sys.path[0], "config.yaml"), "r") as file:
+             config_yaml = yaml.safe_load(file)
         self.SCOPES = ['https://www.googleapis.com/auth/calendar']
         self.credentials_file = None
         self.service = None
         self.token = None
         self.events = pd.DataFrame()
-        self.calendar_id = 'CALENDAR_ID_HERE'
+        self.calendar_id = config_yaml['google']['calendar_id']
+        self.API_key = config_yaml['trello']['API_key']
+        self.API_secret = config_yaml['trello']['API_secret']
+        self.Token = config_yaml['trello']['Token']
 
     #used to set the path of the credentials file
     def set_credentials_file_path(self, path: str):
@@ -195,9 +204,9 @@ class GoogleCalendar():
     def push_to_trello(self, list_id = '628e6a26afeb6c3cdb169476'):
         # If this function does not work, as in no card appears on trello, try getting new API key and Token.
         cal_data = self.events
-        API_key = 'API_KEY_HERE'
-        API_secret = 'API_SECRET_HERE'
-        Token = 'TOKEN_HERE'
+        API_key = self.API_key
+        API_secret = self.API_secret
+        Token = self.Token
 
         url = "https://api.trello.com/1/cards"
 
@@ -241,9 +250,9 @@ class GoogleCalendar():
 
     #Returns all the unique ids for each card in a given list
     def get_cards_from_list_trello(self, list_id = '628e6a26afeb6c3cdb169476'):
-        API_key = 'API_KEY_HERE'
-        API_secret = 'API_SECRET_HERE'
-        Token = 'TOKEN_HERE'
+        API_key = self.API_key
+        API_secret = self.API_secret
+        Token = self.Token
         
         url = "https://api.trello.com/1/lists/" + list_id + "/cards"
 
@@ -271,9 +280,9 @@ class GoogleCalendar():
 
     #Deletes a card from the trello board
     def delete_card_from_list_trello(self, card_id):
-        API_key = 'API_KEY_HERE'
-        API_secret = 'API_SECRET_HERE'
-        Token = 'TOKEN_HERE'
+        API_key = self.API_key
+        API_secret = self.API_secret
+        Token = self.Token
 
         url = "https://api.trello.com/1/cards/" + card_id
 

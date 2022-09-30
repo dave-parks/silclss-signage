@@ -1,3 +1,8 @@
+#Author: Devesh Nath
+#Creates an instance of the Google Calendar class 
+#(ie makes a copy of the box that we defined in GoogleCalendar.py)
+#Uses the methods defined for that class to interact with 
+#Google Calendar on a higher level
 from GoogleCalendar import GoogleCalendar
 import os
 import  datetime
@@ -34,7 +39,6 @@ while True:
     Calendar.events = pd.DataFrame()
     Calendar.get_events_from_all_calendars(cal_ids=cal_ids)
     Calendar.process_events(required_categories=['summary', 'location', 'description', 'start', 'end'])
-    # Calendar.process_events(required_categories=['summary', 'location', 'start', 'end'])
     Calendar.push_to_trello()
     print(' Updated at ' + now)
     print('-------------------------')

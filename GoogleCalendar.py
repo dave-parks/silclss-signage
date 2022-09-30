@@ -1,3 +1,5 @@
+# Author: Devesh Nath 
+# edited by Alex Pho
 import datetime
 import pickle
 import os
@@ -19,6 +21,7 @@ class GoogleCalendar():
         self.events = pd.DataFrame()
         self.calendar_id = 'CALENDAR_ID_HERE'
 
+    #used to set the path of the credentials file
     def set_credentials_file_path(self, path: str):
         if not isinstance(path, str):
             raise TypeError('Path should be of type string')
@@ -26,6 +29,8 @@ class GoogleCalendar():
             raise RuntimeError('The specified path/folder may be incorrect, try changing directories in the terminal')
         self.credentials_file = path
 
+    #uses the credentials and scopes given to the code 
+    # to initiate a conversation with Google Calendar API
     def get_calendar_service(self):
         creds = None
         # The file token.pickle stores the user's access and refresh tokens, and is
@@ -51,6 +56,8 @@ class GoogleCalendar():
         except:
             raise RuntimeError('There appears to be a token error, try refreshing the token using token_refresh method')
 
+    #Google returns time data in a very non-readable format.
+    #This function makes it more readable.
     def pretty_time(self, data, num_events, dtype):
         # empty array for holding data
         proc_data = []
@@ -72,6 +79,8 @@ class GoogleCalendar():
 
         return proc_data
 
+    # This gets data for all the events 
+    #in a calendar by talking to Google
     def get_events(self, max_results, timeframe):
         # checks if calendar service already exists
         if self.service == None:
@@ -100,9 +109,12 @@ class GoogleCalendar():
         except:
             raise RuntimeError('Calendar Id might be invalid, update it by using update_calendar_id method, or else you might have used the wrong google account for obtaining the token.')
 
+    #Proceesses the data received by google 
+    #and puts it into a pandas Dataframe
     def process_events(self, pretty_time = True, required_categories = ['summary', 'location', 'description', 'start', 'end']):
-    # def process_events(self, pretty_time = True, required_categories = ['summary', 'location', 'start', 'end']):
-        # Note on required categories: If you enter location or description in the calendar, make sure to add that to required_categories or else the program will skip it.
+        #Note on required categories: If you enter location 
+        #or description in the calendar, make sure to add that 
+        #to required_categories or else the program will skip it.
         for i in required_categories:
             if i not in self.events.columns:
                 required_categories.remove(i)
@@ -122,6 +134,8 @@ class GoogleCalendar():
 
             self.events['timings'] = [self.events['start'][i] + ' -> ' + self.events['end'][i] for i in range(len(self.events))]
             try:
+                # note that the Google Calendar API returns the 
+                #description in HTML. We will need to convert it to Markdown later.
                 self.events['desc'] = [self.events['description'][i] for i in range(len(self.events))]
                 required_categories.remove('start')
                 required_categories.remove('end')
@@ -129,16 +143,20 @@ class GoogleCalendar():
                 required_categories.remove('description')
                 required_categories.append('desc')
             except KeyError:
+                # program tends to crash if there are no descriptions within the 
+                # time frame, this circumvents that by not using description
                 required_categories.remove('start')
                 required_categories.remove('end')
                 required_categories.append('timings')
 
             self.events = self.events[required_categories]
 
+    # Refreshes the token.pickle file. This 
+    #is used to keep the permissions 
+    #for the API up to date.
     def refresh_token(self):
         if os.path.exists("token.pickle"):
-            # os.remove("token.pickle")
-            print("Token exists, using that.")
+            print("token.pickle already exists, using that token.")
         else:
             print("The file does not exist, creating token.")
 
@@ -147,11 +165,21 @@ class GoogleCalendar():
         except :
             raise RuntimeError('Access was denied, repeat the process and hit continue to provide access.')
 
+    #Changes the calendar_id attribute 
+    #in the Google Calendar class
+    #(Basically changes an item 
+    #in the Google Calendar box)
     def update_calendar_id(self, cal_id: str):
         if not isinstance(cal_id, str):
             raise TypeError('Calendar Id should be a string')
         self.calendar_id = cal_id
 
+    #Exports the data in the pandas dataframe to an 
+    #excel file in the working directory
+    #---
+    #alex's note: looks like we 
+    #aren't using this anymore. 
+    #deprecated?
     def events_to_excel(self, sheet_name: str):
         if not isinstance(sheet_name, str):
             raise TypeError('sheet_name should be a string')
@@ -163,6 +191,7 @@ class GoogleCalendar():
             out = sheet_name + ' may already be open, try closing it before running events_to_excel method'
             raise PermissionError(out)
 
+    #Pushes a card to trello, to a particular list
     def push_to_trello(self, list_id = '628e6a26afeb6c3cdb169476'):
         # If this function does not work, as in no card appears on trello, try getting new API key and Token.
         cal_data = self.events
@@ -185,17 +214,10 @@ class GoogleCalendar():
         for i in range(self.events.shape[0]):
             query['name'] = ''
             query['desc'] = ''
-            # for j in range(self.events.columns-1) :
-            # index = 0
-            # while index < len(self.events.columns) - 1:
-            #     query['name'] += str(cal_data[index][i]) + '|'
-            #     index += 1
-            # query['desc'] += str(cal_data[len(self.events.columns)-1][i])
-            
-            # query['desc'] += str(cal_data[len(self.events.columns)-1][i])
             try:
                 for j in self.events.columns[:-1]:
                     query['name'] += str(cal_data[j][i]) + ' | ' 
+                    #Convert HTML to Markdown
                     query['desc'] = markdownify.markdownify(str(self.events['desc'][i]))
             except KeyError:
                 for j in self.events.columns[:-1]:
@@ -209,12 +231,15 @@ class GoogleCalendar():
                 params=query
             )
 
+    #gets events from all calendars 
+    #and adds them to the pandas dataframe
     def get_events_from_all_calendars(self, cal_ids, max_results = 10, timeframe = [0,15,0]):
         # timeframe[0] = hours, timeframe[1] = mins, timeframe[2] = seconds
         for i in cal_ids:
             self.update_calendar_id(cal_ids[i])
             self.get_events(max_results=max_results, timeframe=timeframe)                         
 
+    #Returns all the unique ids for each card in a given list
     def get_cards_from_list_trello(self, list_id = '628e6a26afeb6c3cdb169476'):
         API_key = 'API_KEY_HERE'
         API_secret = 'API_SECRET_HERE'
@@ -244,6 +269,7 @@ class GoogleCalendar():
         cards = [res[i]['id'] for i in range(len(res))]
         return cards
 
+    #Deletes a card from the trello board
     def delete_card_from_list_trello(self, card_id):
         API_key = 'API_KEY_HERE'
         API_secret = 'API_SECRET_HERE'
@@ -262,6 +288,7 @@ class GoogleCalendar():
         params=query
         )
 
+    # Uses all unique card IDs to delete all cards in a list
     def delete_all_cards_from_list_trello(self, list_id = '628e6a26afeb6c3cdb169476'):
         cards = self.get_cards_from_list_trello(list_id=list_id)
         for i in cards:

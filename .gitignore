@@ -2,3 +2,5 @@ Credentials.json
 __pycache__/
 token.pickle
 events.xlsx
+main.spec
+*.yaml

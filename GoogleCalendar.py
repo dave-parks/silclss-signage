@@ -172,7 +172,10 @@ class GoogleCalendar():
         try:
             self.get_calendar_service()
         except :
-            raise RuntimeError('Access was denied, repeat the process and hit continue to provide access.')
+            #Token has expired 
+            print("Token has exired, fetching a new one")
+            os.remove("token.pickle")
+            self.get_calendar_service()
 
     #Changes the calendar_id attribute 
     #in the Google Calendar class

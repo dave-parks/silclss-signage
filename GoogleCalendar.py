@@ -150,21 +150,16 @@ class GoogleCalendar():
                 self.events['end'] = self.pretty_time(self.events, num_events_detected, 'end')
 
             self.events['timings'] = [self.events['start'][i] + ' -> ' + self.events['end'][i] for i in range(len(self.events))]
-            try:
-                required_categories.remove('start')
-                required_categories.remove('end')
-                required_categories.append('timings')
+            required_categories.remove('start')
+            required_categories.remove('end')
+            required_categories.append('timings')
 
-                # note that the Google Calendar API returns the 
-                # description in HTML. We will need to convert it to Markdown later.
-                if 'description' in required_categories:
-                    self.events['desc'] = [self.events['description'][i] for i in range(len(self.events))]
-                    required_categories.remove('description')
-                    required_categories.append('desc')
-            except KeyError:
-                # program tends to crash if there are no descriptions within the 
-                # time frame, this circumvents that by not using description
+            # note that the Google Calendar API returns the 
+            # description in HTML. We will need to convert it to Markdown later.
+            if 'description' in required_categories:
+                self.events['desc'] = [self.events['description'][i] for i in range(len(self.events))]
                 required_categories.remove('description')
+                required_categories.append('desc')
 
             self.events = self.events[required_categories]
 

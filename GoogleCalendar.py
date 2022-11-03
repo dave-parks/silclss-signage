@@ -134,7 +134,15 @@ class GoogleCalendar():
         else: 
             # tends to crash the program if a field like location is left empty
             # and there is only one event in the list
-            self.events = self.events[required_categories]     
+            
+            try:
+                self.events = self.events[required_categories]     
+            except KeyError:
+                # for some reason if you leave location empty everything is completely fine,
+                # but an empty description can crash the program in several different locations. 
+                # adding this as a workaround for now.
+                required_categories.remove('description')
+            
             num_events_detected = self.events.shape[0]
 
             if pretty_time:
@@ -143,20 +151,20 @@ class GoogleCalendar():
 
             self.events['timings'] = [self.events['start'][i] + ' -> ' + self.events['end'][i] for i in range(len(self.events))]
             try:
-                # note that the Google Calendar API returns the 
-                #description in HTML. We will need to convert it to Markdown later.
-                self.events['desc'] = [self.events['description'][i] for i in range(len(self.events))]
                 required_categories.remove('start')
                 required_categories.remove('end')
                 required_categories.append('timings')
-                required_categories.remove('description')
-                required_categories.append('desc')
+
+                # note that the Google Calendar API returns the 
+                # description in HTML. We will need to convert it to Markdown later.
+                if 'description' in required_categories:
+                    self.events['desc'] = [self.events['description'][i] for i in range(len(self.events))]
+                    required_categories.remove('description')
+                    required_categories.append('desc')
             except KeyError:
                 # program tends to crash if there are no descriptions within the 
                 # time frame, this circumvents that by not using description
-                required_categories.remove('start')
-                required_categories.remove('end')
-                required_categories.append('timings')
+                required_categories.remove('description')
 
             self.events = self.events[required_categories]
 

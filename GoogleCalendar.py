@@ -1,6 +1,7 @@
 # Author: Devesh Nath 
 # edited by Alex Pho
 import datetime
+import logging
 import pickle
 import sys
 import os
@@ -101,22 +102,30 @@ class GoogleCalendar():
         now = now.isoformat() + 'Z' # 'Z' indicates UTC time
         plus_timeframe = plus_timeframe.isoformat() + 'Z'
 
-        try:
-            # getting an object that holds calendar data
-            events_result = self.service.events().list(
-                calendarId=self.calendar_id, timeMin=now,
-                timeMax=plus_timeframe, maxResults=max_results,
-                singleEvents=True, orderBy='startTime').execute()
-            
-            # converting the data in the object to DataFrame object type
-            events = events_result.get('items', [])
-            events = pd.DataFrame.from_dict(events)
+        success = False
 
-            # concatenate if events already exist, ignore_index arg makes sure the indexes are correctly labeled
-            self.events = pd.concat([self.events, events], ignore_index=True)
+        while success != True:
 
-        except:
-            raise RuntimeError('Calendar Id might be invalid, update it by using update_calendar_id method, or else you might have used the wrong google account for obtaining the token.')
+            try:
+                # getting an object that holds calendar data
+                events_result = self.service.events().list(
+                    calendarId=self.calendar_id, timeMin=now,
+                    timeMax=plus_timeframe, maxResults=max_results,
+                    singleEvents=True, orderBy='startTime').execute()
+                
+                # converting the data in the object to DataFrame object type
+                events = events_result.get('items', [])
+                events = pd.DataFrame.from_dict(events)
+
+                # concatenate if events already exist, ignore_index arg makes sure the indexes are correctly labeled
+                self.events = pd.concat([self.events, events], ignore_index=True)
+                success = True
+
+            except: 
+                logging.error('Google timeout, or id needs to be updated')
+                os.remove("token.pickle")
+                self.get_calendar_service()
+                success = False
 
     #Proceesses the data received by google 
     #and puts it into a pandas Dataframe
@@ -129,7 +138,7 @@ class GoogleCalendar():
                 required_categories.remove(i)
 
         if self.events.empty:
-            print('No upcoming events found.')
+            logging.info('No upcoming events found.')
 
         else: 
             # tends to crash the program if a field like location is left empty
@@ -168,15 +177,15 @@ class GoogleCalendar():
     #for the API up to date.
     def refresh_token(self):
         if os.path.exists("token.pickle"):
-            print("token.pickle already exists, using that token.")
+            logging.info('token.pickle already exists, using that token.')
         else:
-            print("The file does not exist, creating token.")
+            logging.info('The file does not exist, creating token.')
 
         try:
             self.get_calendar_service()
         except :
             #Token has expired 
-            print("Token has exired, fetching a new one")
+            logging.warn("Token has exired, fetching a new one")
             os.remove("token.pickle")
             self.get_calendar_service()
 
@@ -237,7 +246,7 @@ class GoogleCalendar():
             except KeyError:
                 for j in self.events.columns[:-1]:
                   query['name'] += str(cal_data[j][i]) + ' | ' 
-                print("No descriptions found")
+                logging.info('No descriptions found')
 
             response = requests.request(
                 "POST",

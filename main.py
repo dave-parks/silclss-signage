@@ -28,13 +28,11 @@ cal_ids = {
     'DH 138': config_yaml['google']['DH 138'],
     'DH 142': config_yaml['google']['DH 142']
 } 
-
-print("Current path is: ", os.getcwd())
+scriptpath = config_yaml['path']['directory']
+os.chdir(scriptpath)
 os.chdir(os.getcwd()) 
 delay = 300
 Calendar = GoogleCalendar()
-print("Credentials path is:")
-print(os.path.join(os.getcwd(), "Credentials.json"))
 Calendar.set_credentials_file_path(r"{0}".format(os.path.join(os.getcwd(), "Credentials.json")))
 Calendar.refresh_token()
 Calendar.get_calendar_service()

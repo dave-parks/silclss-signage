@@ -35,6 +35,9 @@ This script requires `python` and the following `pip` packages:
 pip install --upgrade pandas requests google-api-python-client google-auth-httplib2 google-auth-oauthlib markdownify
 ```
 
+# Todo
+Generalize the list ID as well, forgot to do this
+
 # Contributors
 Devesh Nath wrote most of the code, with help from the following API documentation: 
 

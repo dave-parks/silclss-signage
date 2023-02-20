@@ -1,0 +1,8 @@
+trello:
+  API_key: 'YOUR KEY HERE'
+  API_secret: 'YOUR KEY HERE'
+  Token: 'YOUR TOKEN HERE'
+google:
+  calendar_id: 'YOUR CALENDAR ID HERE'
+path:
+  directory: 'PATH TO THIS FOLDER'

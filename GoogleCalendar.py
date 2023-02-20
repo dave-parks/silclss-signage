@@ -121,8 +121,8 @@ class GoogleCalendar():
                 self.events = pd.concat([self.events, events], ignore_index=True)
                 success = True
 
-            except: 
-                logging.error('Google timeout, or id needs to be updated')
+            except Exception as e: 
+                logging.error(e)
                 os.remove("token.pickle")
                 self.get_calendar_service()
                 success = False

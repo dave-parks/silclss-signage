@@ -3,4 +3,4 @@ __pycache__/
 token.pickle
 events.xlsx
 main.spec
-*.yaml
+config.yaml
